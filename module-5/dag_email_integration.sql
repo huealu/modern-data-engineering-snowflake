@@ -1,4 +1,4 @@
-USE ROLE accountadmin;
+TASTY_BYTES.RAW_POS.SEND_LAST_SEVEN_DAYS_REPORTTASTY_BYTES.RAW_POS.SEND_LAST_SEVEN_DAYS_REPORTTASTY_BYTES.RAW_POS.SEND_LAST_SEVEN_DAYS_REPORTUSE ROLE accountadmin;
 USE WAREHOUSE compute_wh;
 USE DATABASE tasty_bytes;
 
@@ -6,7 +6,7 @@ USE DATABASE tasty_bytes;
 CREATE OR REPLACE NOTIFICATION INTEGRATION email_notification_int
 TYPE = EMAIL
 ENABLED = TRUE
-ALLOWED_RECIPIENTS = ('email@address.com');  -- Update the recipient's email here
+ALLOWED_RECIPIENTS = ('helendinh0815@gmail.com');  -- Update the recipient's email here -- should be the email linked to Snowflake account
 
 CREATE OR REPLACE PROCEDURE tasty_bytes.raw_pos.last_seven_days_report()
 RETURNS STRING
@@ -82,7 +82,7 @@ def send_email(session: Session) -> str:
     # Send the email
     session.call("system$send_email",
                  "email_notification_int",
-                 "email@address.com",
+                 "helendinh0815@gmail.com",
                  "Weekly Sales Report for Hamburg",
                  email_content,
                  "text/html")
@@ -95,15 +95,17 @@ $$;
 -- It calls the sproc above
 CREATE OR REPLACE TASK tasty_bytes.raw_pos.send_last_seven_days_report
 WAREHOUSE = 'COMPUTE_WH'
+-- "After" is used for chaining the tasks together - creating DAGs
 AFTER tasty_bytes.raw_pos.process_orders_header_sproc
 AS
 CALL tasty_bytes.raw_pos.last_seven_days_report();
 
 -- Start the tasks
 ALTER TASK tasty_bytes.raw_pos.send_last_seven_days_report RESUME;
+-- Start the Root task 
 ALTER TASK tasty_bytes.raw_pos.process_orders_header_sproc RESUME;
 
--- Start the DAG
+-- Start the DAG -- manually execute the task 
 EXECUTE TASK tasty_bytes.raw_pos.process_orders_header_sproc;
 
 -- Stop the tasks

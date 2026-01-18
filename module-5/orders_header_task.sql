@@ -1,11 +1,11 @@
-USE ROLE accountadmin;
+TASTY_BYTES.RAW_POS.PROCESS_ORDERS_HEADER_SPROCUSE ROLE accountadmin;
 USE WAREHOUSE compute_wh;
 USE DATABASE tasty_bytes;
 
 -- Task that runs executes every minute
 CREATE OR REPLACE TASK tasty_bytes.raw_pos.process_orders_header_sproc
-WAREHOUSE = 'COMPUTE_WH'
-SCHEDULE = 'USING CRON * * * * * UTC'
+WAREHOUSE = 'COMPUTE_WH' -- User-managed task 
+SCHEDULE = 'USING CRON * * * * * UTC' -- Cron Expression for executing the task every minute
 AS
 CALL tasty_bytes.raw_pos.process_order_headers_stream();
 
